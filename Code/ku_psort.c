@@ -73,6 +73,9 @@ void multiProcessMergeSort(int processNumber) {
             printf("\n");
         }
 
+<<<<<<< HEAD
+>>>>>>> parent of 3e65c21... 완성2
+=======
 >>>>>>> parent of 3e65c21... 완성2
     }
     else {
@@ -81,6 +84,7 @@ void multiProcessMergeSort(int processNumber) {
         recursiveMergeSort(start, end);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         int sendDataLength = end - start;
 
         messageQueueAttribute.mq_maxmsg = sendDataLength;
@@ -88,11 +92,16 @@ void multiProcessMergeSort(int processNumber) {
         mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
         mq_send(message, (char*)&data[start], sendDataLength * sizeof(int), processNumber - myProcessNumber);
 =======
+=======
+>>>>>>> parent of 3e65c21... 완성2
         struct mq_attr messageQueueAttribute;
         messageQueueAttribute.mq_maxmsg = dataLength;
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
         mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
         mq_send(message, (char*)data, dataLength * sizeof(int), processNumber - myProcessNumber);
+<<<<<<< HEAD
+>>>>>>> parent of 3e65c21... 완성2
+=======
 >>>>>>> parent of 3e65c21... 완성2
         mq_close(message);
     }
