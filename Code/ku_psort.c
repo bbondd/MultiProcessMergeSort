@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mqueue.h>
+#include "ku_psort.h"
 
 int dataLength;
 int* data;
@@ -50,34 +51,18 @@ void multiProcessMergeSort(int processNumber) {
             break;
         }    
 
-    char path[] = "/sortedPart";
-
-    if(getpid() == parentProcessID) { //parent
-    
-        struct mq_attr messageQueueAttribute;
+    char messageQueueFileName[] = "/sortedPart";
+    struct mq_attr messageQueueAttribute;
+    if(getpid() == parentProcessID) { //parent    
         messageQueueAttribute.mq_maxmsg = dataLength;
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        mqd_t message = mq_open(path, O_CREAT | O_RDONLY, 0666, &messageQueueAttribute);
-        int* tempArray = (int*)calloc(dataLength, sizeof(int));
+        mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_RDONLY, 0666, &messageQueueAttribute);
         
         for(int i = 0; i < processNumber; i++) waitpid(processID[i]);
-        
-        for(int i = 0; i < processNumber; i++) {
-            mq_receive(message, tempArray + dataLength * i / processNumber, dataLength * sizeof(int), NULL);
-        }
-
-        for(int i = 0; i < dataLength; i++){
-            data[i] = tempArray[i];
-        }
-
-        for(int i = 0; i < processNumber; i++) {
-            merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
-        }
-
-        for(int i = 0; i < dataLength; i++) printf("%d\t", data[i]);
-
+        for(int i = 0; i < processNumber; i++) mq_receive(message, data + dataLength * i / processNumber, dataLength * sizeof(int), NULL);  
+        for(int i = 0; i < processNumber; i++) merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
+    
         mq_close(message);
-
     }
     else {
         int start = dataLength * myProcessNumber / processNumber;
@@ -85,16 +70,11 @@ void multiProcessMergeSort(int processNumber) {
         recursiveMergeSort(start, end);
 
         int sendDataLength = end - start;
-        int* sendData = (int*)calloc(sendDataLength, sizeof(int));
-        for(int i = 0; i < sendDataLength; i++) {
-            sendData[i] = data[start + i];
-        }
 
-        struct mq_attr messageQueueAttribute;
         messageQueueAttribute.mq_maxmsg = sendDataLength;
         messageQueueAttribute.mq_msgsize = sendDataLength * sizeof(int);
-        mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        mq_send(message, (char*)sendData, sendDataLength * sizeof(int), processNumber - myProcessNumber);
+        mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
+        mq_send(message, (char*)&data[start], sendDataLength * sizeof(int), processNumber - myProcessNumber);
         mq_close(message);
     }
 }
