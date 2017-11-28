@@ -59,25 +59,22 @@ void multiProcessMergeSort(int processNumber) {
         mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_RDONLY, 0666, &messageQueueAttribute);
         
         for(int i = 0; i < processNumber; i++) waitpid(processID[i]);
-        
-        for(int i = 0; i < processNumber; i++) {
-            int result = mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
-            printf("result : %d\n", result);
-            for(int j = 0; j < dataLength; j++) printf("%d\t", tempArray[j]);
-            printf("\n");
-        }
-
+        for(int i = 0; i < processNumber; i++) mq_receive(message, data + dataLength * i / processNumber, dataLength * sizeof(int), NULL);  
+        for(int i = 0; i < processNumber; i++) merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
+    
+        mq_close(message);
     }
     else {
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
 
-        struct mq_attr messageQueueAttribute;
-        messageQueueAttribute.mq_maxmsg = dataLength;
-        messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        mq_send(message, (char*)data, dataLength * sizeof(int), processNumber - myProcessNumber);
+        int sendDataLength = end - start;
+
+        messageQueueAttribute.mq_maxmsg = sendDataLength;
+        messageQueueAttribute.mq_msgsize = sendDataLength * sizeof(int);
+        mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
+        mq_send(message, (char*)&data[start], sendDataLength * sizeof(int), processNumber - myProcessNumber);
         mq_close(message);
     }
 }
