@@ -51,6 +51,7 @@ void multiProcessMergeSort(int processNumber) {
             break;
         }    
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     char messageQueueFileName[] = "/sortedPart";
     struct mq_attr messageQueueAttribute;
@@ -78,6 +79,11 @@ void multiProcessMergeSort(int processNumber) {
 
     if(getpid() == parentProcessID) { //parent
 >>>>>>> parent of 53c45c4... 일단 완성
+=======
+    
+
+    if(getpid() == parentProcessID) { //parent
+>>>>>>> parent of 53c45c4... 일단 완성
 
 >>>>>>> parent of 3e65c21... 완성2
     }
@@ -98,9 +104,15 @@ void multiProcessMergeSort(int processNumber) {
         messageQueueAttribute.mq_maxmsg = dataLength * sizeof(int);
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
 <<<<<<< HEAD
+<<<<<<< HEAD
         mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
         mq_send(message, (char*)data, dataLength * sizeof(int), processNumber - myProcessNumber);
 >>>>>>> parent of 3e65c21... 완성2
+=======
+        mqd_t message = mq_open("/part_sorted_data", O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
+        int i = mq_send(message, (char*)data, dataLength * sizeof(int), myProcessNumber);
+        printf("%d", i);
+>>>>>>> parent of 53c45c4... 일단 완성
 =======
         mqd_t message = mq_open("/part_sorted_data", O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
         int i = mq_send(message, (char*)data, dataLength * sizeof(int), myProcessNumber);
