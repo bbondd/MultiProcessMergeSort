@@ -57,7 +57,7 @@ void multiProcessMergeSort(int processNumber) {
     messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
     mqd_t message = mq_open(path, O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
 
-    if(getpid() == parentProcessID) { //parent
+    if(getpid() == parentProcessID) {
         for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
 
         int* tempArray = (int*)calloc(dataLength, sizeof(int));
@@ -70,7 +70,7 @@ void multiProcessMergeSort(int processNumber) {
             merge(0, start, end);
         }
     }
-    else { //child
+    else {
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
