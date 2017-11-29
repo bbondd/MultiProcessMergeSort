@@ -51,48 +51,33 @@ void multiProcessMergeSort(int processNumber) {
         }    
 
     char path[] = "/sortedPart";
+    struct mq_attr messageQueueAttribute;
+    messageQueueAttribute.mq_maxmsg = dataLength;
+    messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
+    mqd_t message = mq_open(path, O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
 
     if(getpid() == parentProcessID) { //parent
-        struct mq_attr messageQueueAttribute;
-        messageQueueAttribute.mq_maxmsg = dataLength;
-        messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        
-        mqd_t message = mq_open(path, O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
-        int* tempArray = (int*)calloc(dataLength, sizeof(int));
-        
         for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
+
+        int* tempArray = (int*)calloc(dataLength, sizeof(int));
         for(int i = 0; i < processNumber; i++) {
             mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
             int start = dataLength * i / processNumber;
             int end = dataLength * (i + 1) / processNumber;
             for(int j = start; j < end; j++) data[j] = tempArray[j];
-        }
-
-        for(int i = 0; i < dataLength; i++) printf("%d\t", data[i]);
-        for(int i = 0; i < processNumber; i++) {
-            int start = dataLength * i / processNumber;
-            int end = dataLength * (i + 1) / processNumber;
-            printf("merging 0 to %d to %d\n", start, end);
             merge(0, start, end);
         }
-        for(int i = 0; i < dataLength; i++) printf("%d\t", data[i]);
-
-        mq_close(message);
     }
-    else {
+    else { //child
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
 
-        struct mq_attr messageQueueAttribute;
-        messageQueueAttribute.mq_maxmsg = dataLength;
-        messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        
-        mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
         mq_send(message, data, dataLength * sizeof(int), processNumber - myProcessNumber);
         mq_close(message);
         exit(3);
     }
+    mq_close(message);
 }
 
 void writeDataToFile(char* fileName) {
