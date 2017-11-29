@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mqueue.h>
+#include "ku_psort.h"
 
 int dataLength;
 int* data;
@@ -48,7 +49,7 @@ void multiProcessMergeSort(int processNumber) {
         if((childProcessID[i] = fork()) == 0) {
             myProcessNumber = i;
             break;
-        }    
+        }
 
     char path[] = "/sortedPart";
     struct mq_attr messageQueueAttribute;
@@ -61,9 +62,10 @@ void multiProcessMergeSort(int processNumber) {
 
         int* tempArray = (int*)calloc(dataLength, sizeof(int));
         for(int i = 0; i < processNumber; i++) {
-            mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
             int start = dataLength * i / processNumber;
             int end = dataLength * (i + 1) / processNumber;
+
+            mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
             for(int j = start; j < end; j++) data[j] = tempArray[j];
             merge(0, start, end);
         }
