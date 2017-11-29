@@ -42,114 +42,43 @@ void recursiveMergeSort(int start, int end) {
 }
 
 void multiProcessMergeSort(int processNumber) {
-    int* processID = (int*)calloc(processNumber, sizeof(int));
+    int* childProcessID = (int*)calloc(processNumber, sizeof(int));
     int parentProcessID = getpid(), myProcessNumber;
     for(int i = 0; i < processNumber; i++)
-        if((processID[i] = fork()) == 0) {
+        if((childProcessID[i] = fork()) == 0) {
             myProcessNumber = i;
             break;
         }    
-<<<<<<< HEAD
-<<<<<<< HEAD
 
     char path[] = "/sortedPart";
 
     if(getpid() == parentProcessID) { //parent
-    
         struct mq_attr messageQueueAttribute;
         messageQueueAttribute.mq_maxmsg = dataLength;
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        mqd_t message = mq_open(path, O_CREAT | O_RDONLY, 0666, &messageQueueAttribute);
+        mqd_t message = mq_open("/sortedPart", O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
         int* tempArray = (int*)calloc(dataLength, sizeof(int));
         
-        for(int i = 0; i < processNumber; i++) waitpid(processID[i]);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        for(int i = 0; i < processNumber; i++) mq_receive(message, data + dataLength * i / processNumber, dataLength * sizeof(int), NULL);  
-        for(int i = 0; i < processNumber; i++) merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
-    
-        mq_close(message);
-=======
-        
+        for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
         for(int i = 0; i < processNumber; i++) {
             int result = mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
             printf("result : %d\n", result);
             for(int j = 0; j < dataLength; j++) printf("%d\t", tempArray[j]);
             printf("\n");
-        }
-=======
-    
-
-    if(getpid() == parentProcessID) { //parent
->>>>>>> parent of 53c45c4... 일단 완성
-=======
-    
-
-    if(getpid() == parentProcessID) { //parent
->>>>>>> parent of 53c45c4... 일단 완성
-
->>>>>>> parent of 3e65c21... 완성2
-=======
-        
-        for(int i = 0; i < processNumber; i++) {
-            mq_receive(message, tempArray + dataLength * i / processNumber, dataLength * sizeof(int), NULL);
-        }
-
-        for(int i = 0; i < dataLength; i++){
-            data[i] = tempArray[i];
-        }
-
-        for(int i = 0; i < processNumber; i++) {
-            merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
-        }
-
-        for(int i = 0; i < dataLength; i++) printf("%d\t", data[i]);
-
+        }      
         mq_close(message);
-
->>>>>>> parent of 28e3a44... 완성
     }
     else {
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
 
-<<<<<<< HEAD
-        int sendDataLength = end - start;
-        int* sendData = (int*)calloc(sendDataLength, sizeof(int));
-        for(int i = 0; i < sendDataLength; i++) {
-            sendData[i] = data[start + i];
-        }
-
         struct mq_attr messageQueueAttribute;
-        messageQueueAttribute.mq_maxmsg = sendDataLength;
-        messageQueueAttribute.mq_msgsize = sendDataLength * sizeof(int);
-<<<<<<< HEAD
-        mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        mq_send(message, (char*)&data[start], sendDataLength * sizeof(int), processNumber - myProcessNumber);
-=======
-        struct mq_attr messageQueueAttribute;
-        messageQueueAttribute.mq_maxmsg = dataLength * sizeof(int);
+        messageQueueAttribute.mq_maxmsg = dataLength;
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        mq_send(message, (char*)data, dataLength * sizeof(int), processNumber - myProcessNumber);
->>>>>>> parent of 3e65c21... 완성2
-=======
-        mqd_t message = mq_open("/part_sorted_data", O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        int i = mq_send(message, (char*)data, dataLength * sizeof(int), myProcessNumber);
-        printf("%d", i);
->>>>>>> parent of 53c45c4... 일단 완성
-=======
-        mqd_t message = mq_open("/part_sorted_data", O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        int i = mq_send(message, (char*)data, dataLength * sizeof(int), myProcessNumber);
-        printf("%d", i);
->>>>>>> parent of 53c45c4... 일단 완성
-=======
-        mqd_t message = mq_open(path, O_CREAT | O_WRONLY, 0666, &messageQueueAttribute);
-        mq_send(message, (char*)sendData, sendDataLength * sizeof(int), processNumber - myProcessNumber);
->>>>>>> parent of 28e3a44... 완성
+        
+        mqd_t message = mq_open("/sortedPart", O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
+        mq_send(message, data, dataLength * sizeof(int), processNumber - myProcessNumber);
         mq_close(message);
     }
 }
