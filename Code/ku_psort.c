@@ -15,6 +15,13 @@ void readDataFromFile(char* fileName) {
     data = fileData;
 }
 
+void writeDataToFile(char* fileName) {
+    FILE* outputFile = fopen(fileName, "w");
+    for(int i = 0; i < dataLength; i++) fprintf(outputFile, "%d\n", data[i]);
+    fclose(outputFile);
+}
+
+
 void merge(int start, int middle, int end) {
     int i = 0, left = start, right = middle;
     int* tempArray = (int*)calloc(end - start, sizeof(int));
@@ -82,11 +89,6 @@ void multiProcessMergeSort(int processNumber) {
     mq_close(message);
 }
 
-void writeDataToFile(char* fileName) {
-    FILE* outputFile = fopen(fileName, "w");
-    for(int i = 0; i < dataLength; i++) fprintf(outputFile, "%d\n", data[i]);
-    fclose(outputFile);
-}
 
 void main(int argc, char* argv[]) {
     dataLength = atoi(argv[1]);
