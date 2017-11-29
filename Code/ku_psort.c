@@ -51,6 +51,16 @@ void multiProcessMergeSort(int processNumber) {
         }    
 
     char path[] = "/sortedPart";
+<<<<<<< HEAD
+=======
+    struct mq_attr messageQueueAttribute;
+    messageQueueAttribute.mq_maxmsg = dataLength;
+    messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
+    mqd_t message = mq_open(path, O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
+
+    if(getpid() == parentProcessID) { //parent
+        for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
+>>>>>>> parent of 57b3938... 주석 삭제
 
     if(getpid() == parentProcessID) { //parent
         struct mq_attr messageQueueAttribute;
@@ -91,7 +101,7 @@ void multiProcessMergeSort(int processNumber) {
 =======
 >>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
     }
-    else {
+    else { //child
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
