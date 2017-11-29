@@ -15,6 +15,13 @@ void readDataFromFile(char* fileName) {
     data = fileData;
 }
 
+void writeDataToFile(char* fileName) {
+    FILE* outputFile = fopen(fileName, "w");
+    for(int i = 0; i < dataLength; i++) fprintf(outputFile, "%d\n", data[i]);
+    fclose(outputFile);
+}
+
+
 void merge(int start, int middle, int end) {
     int i = 0, left = start, right = middle;
     int* tempArray = (int*)calloc(end - start, sizeof(int));
@@ -43,46 +50,46 @@ void recursiveMergeSort(int start, int end) {
 }
 
 void multiProcessMergeSort(int processNumber) {
-    int* processID = (int*)calloc(processNumber, sizeof(int));
+    int* childProcessID = (int*)calloc(processNumber, sizeof(int));
     int parentProcessID = getpid(), myProcessNumber;
     for(int i = 0; i < processNumber; i++)
-        if((processID[i] = fork()) == 0) {
+        if((childProcessID[i] = fork()) == 0) {
             myProcessNumber = i;
             break;
-        }    
-
-    char messageQueueFileName[] = "/sortedPart";
-    struct mq_attr messageQueueAttribute;
-    if(getpid() == parentProcessID) { //parent    
-        messageQueueAttribute.mq_maxmsg = dataLength;
-        messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
-        mqd_t message = mq_open(messageQueueFileName, O_CREAT | O_RDONLY, 0666, &messageQueueAttribute);
-        
-        for(int i = 0; i < processNumber; i++) waitpid(processID[i]);
-<<<<<<< HEAD
-        for(int i = 0; i < processNumber; i++) mq_receive(message, data + dataLength * i / processNumber, dataLength * sizeof(int), NULL);  
-        for(int i = 0; i < processNumber; i++) merge(0, dataLength * i / processNumber, dataLength * (i + 1) / processNumber);
-    
-        mq_close(message);
-=======
-        
-        for(int i = 0; i < processNumber; i++) {
-            int result = mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
-            printf("result : %d\n", result);
-            for(int j = 0; j < dataLength; j++) printf("%d\t", tempArray[j]);
-            printf("\n");
         }
 
+    char path[] = "/sortedPart";
+    struct mq_attr messageQueueAttribute;
+    messageQueueAttribute.mq_maxmsg = dataLength;
+    messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
+    mqd_t message = mq_open(path, O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
+
+    if(getpid() == parentProcessID) {
+        for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
+
+        int* tempArray = (int*)calloc(dataLength, sizeof(int));
+        for(int i = 0; i < processNumber; i++) {
+            int start = dataLength * i / processNumber;
+            int end = dataLength * (i + 1) / processNumber;
+
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> parent of 3e65c21... 완성2
 =======
 >>>>>>> parent of 3e65c21... 완성2
+=======
+            mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
+            for(int j = start; j < end; j++) data[j] = tempArray[j];
+            merge(0, start, end);
+        }
+>>>>>>> acfc9dadb06f2b3c1f3ca29a8d751dce0a1b24dc
     }
     else {
         int start = dataLength * myProcessNumber / processNumber;
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         int sendDataLength = end - start;
@@ -103,15 +110,15 @@ void multiProcessMergeSort(int processNumber) {
 >>>>>>> parent of 3e65c21... 완성2
 =======
 >>>>>>> parent of 3e65c21... 완성2
+=======
+        mq_send(message, data, dataLength * sizeof(int), processNumber - myProcessNumber);
+>>>>>>> acfc9dadb06f2b3c1f3ca29a8d751dce0a1b24dc
         mq_close(message);
+        exit(3);
     }
+    mq_close(message);
 }
 
-void writeDataToFile(char* fileName) {
-    FILE* outputFile = fopen(fileName, "w");
-    for(int i = 0; i < dataLength; i++) fprintf(outputFile, "%d\n", data[i]);
-    fclose(outputFile);
-}
 
 void main(int argc, char* argv[]) {
     dataLength = atoi(argv[1]);
