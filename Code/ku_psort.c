@@ -21,7 +21,6 @@ void writeDataToFile(char* fileName) {
     fclose(outputFile);
 }
 
-
 void merge(int start, int middle, int end) {
     int i = 0, left = start, right = middle;
     int* tempArray = (int*)calloc(end - start, sizeof(int));
