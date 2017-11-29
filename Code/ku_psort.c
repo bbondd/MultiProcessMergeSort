@@ -62,6 +62,7 @@ void multiProcessMergeSort(int processNumber) {
         for(int i = 0; i < processNumber; i++) waitpid(childProcessID[i]);
         for(int i = 0; i < processNumber; i++) {
 <<<<<<< HEAD
+<<<<<<< HEAD
             int start = dataLength * i / processNumber;
             int end = dataLength * (i + 1) / processNumber;
 
@@ -77,12 +78,17 @@ void multiProcessMergeSort(int processNumber) {
         }
 >>>>>>> acfc9dadb06f2b3c1f3ca29a8d751dce0a1b24dc
 =======
+=======
+>>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
             int result = mq_receive(message, tempArray, dataLength * sizeof(int), NULL);
             printf("result : %d\n", result);
             for(int j = 0; j < dataLength; j++) printf("%d\t", tempArray[j]);
             printf("\n");
         }      
         mq_close(message);
+<<<<<<< HEAD
+>>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
+=======
 >>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
     }
     else {
@@ -90,6 +96,7 @@ void multiProcessMergeSort(int processNumber) {
         int end = dataLength * (myProcessNumber + 1) / processNumber;
         recursiveMergeSort(start, end);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -114,11 +121,16 @@ void multiProcessMergeSort(int processNumber) {
 >>>>>>> parent of 3e65c21... 완성2
 =======
 =======
+=======
+>>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
         struct mq_attr messageQueueAttribute;
         messageQueueAttribute.mq_maxmsg = dataLength;
         messageQueueAttribute.mq_msgsize = dataLength * sizeof(int);
         
         mqd_t message = mq_open("/sortedPart", O_CREAT | O_RDWR, 0666, &messageQueueAttribute);
+<<<<<<< HEAD
+>>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
+=======
 >>>>>>> parent of acfc9da... Merge pull request #1 from bbondd/AllDataSend
         mq_send(message, data, dataLength * sizeof(int), processNumber - myProcessNumber);
 >>>>>>> acfc9dadb06f2b3c1f3ca29a8d751dce0a1b24dc
